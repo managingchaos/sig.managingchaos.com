@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Copy Email Signature</title>
+  <style>
+    body {
+      font-family: 'Trebuchet MS', sans-serif;
+      margin: 40px;
+      color: #212121;
+    }
+    .toggle-buttons {
+      margin-bottom: 20px;
+    }
+    button {
+      background-color: #606060;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      cursor: pointer;
+      font-size: 14px;
+      margin-right: 10px;
+    }
+    button:hover {
+      background-color: #444;
+    }
+    #signaturePreview, #signatureCode {
+      display: none;
+      margin-bottom: 20px;
+    }
+    #signatureCode {
+      width: 100%;
+      height: 200px;
+      font-family: monospace;
+      font-size: 13px;
+      padding: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Click below to copy your email signature</h2>
+  <div class="toggle-buttons">
+    <button onclick="toggleView('preview')">Show Preview</button>
+    <button onclick="toggleView('code')">Show HTML Code</button>
+  </div>
+
+  <div id="signaturePreview">Loading preview...</div>
+  <textarea id="signatureCode" readonly>Loading signature HTML...</textarea>
+  <button onclick="copyToClipboard()">Copy</button>
+
+  <script>
+    let rawHTML = '';
+
+    fetch('signature')
+      .then(response => response.text())
+      .then(html => {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        rawHTML = doc.body.innerHTML.trim();
+        document.getElementById('signaturePreview').innerHTML = rawHTML;
+        document.getElementById('signatureCode').value = rawHTML;
+        toggleView('preview');
+      })
+      .catch(err => {
+        document.getElementById('signaturePreview').innerText = 'Failed to load signature.';
+        document.getElementById('signatureCode').value = 'Failed to load signature.';
+        console.error('Error loading signature:', err);
+      });
+
+    function toggleView(view) {
+      const preview = document.getElementById('signaturePreview');
+      const code = document.getElementById('signatureCode');
+      if (view === 'preview') {
+        preview.style.display = 'block';
+        code.style.display = 'none';
+      } else {
+        preview.style.display = 'none';
+        code.style.display = 'block';
+      }
+    }
+
+    function copyToClipboard() {
+      const codeBox = document.getElementById('signatureCode');
+      codeBox.select();
+      document.execCommand('copy');
+      alert('HTML copied to clipboard!');
+    }
+  </script>
+</body>
+</html>
